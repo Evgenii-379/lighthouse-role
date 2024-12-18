@@ -1,0 +1,19 @@
+---
+# tasks file for lighthouse-role
+
+- name: Install dependencies
+  apt:
+    name:
+      - git
+      - nginx
+    state: present
+
+- name: Copy Lighthouse configuration file
+  template:
+    src: lighthouse_nginx.conf.j2
+    dest: /etc/nginx/sites-available/lighthouse.conf
+  notify: Reload nginx
+
+- name: Enable Lighthouse site in Nginx
+  command: nginx -s reload
+
