@@ -1,2 +1,6 @@
 ---
 # defaults file for lighthouse-role
+
+lighthouse_repo_url: "https://github.com/VKCOM/lighthouse/archive/refs/heads/master.zip"
+lighthouse_local_path: "/tmp/lighthouse.zip"
+lighthouse_extract_path: "/var/www/lighthouse"

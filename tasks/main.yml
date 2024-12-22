@@ -1,19 +1,49 @@
 ---
 # tasks file for lighthouse-role
 
-- name: Install dependencies
-  apt:
-    name:
-      - git
-      - nginx
-    state: present
+- name: Install and Configure LightHouse
+  become: true
+  block:
 
-- name: Copy Lighthouse configuration file
-  template:
-    src: lighthouse_nginx.conf.j2
-    dest: /etc/nginx/sites-available/lighthouse.conf
-  notify: Reload nginx
+     - name: Create destination directory for LightHouse
+       ansible.builtin.file:
+         path: "{{ lighthouse_extract_path }}"
+         state: directory
+         mode: '0755'
 
-- name: Enable Lighthouse site in Nginx
-  command: nginx -s reload
+     - name: Download LightHouse static files
+       ansible.builtin.get_url:
+         url: "{{ lighthouse_repo_url }}"
+         dest: "{{ lighthouse_local_path }}"
 
+     - name: Install unzip
+       ansible.builtin.apt:
+         name: unzip
+         state: present
+       become: true
+
+     - name: Unzip LightHouse files
+       ansible.builtin.unarchive:
+         src: "{{ lighthouse_local_path }}"
+         dest: "{{ lighthouse_extract_path }}"
+         remote_src: true
+         extra_opts: ['-o']
+
+
+     - name: Install Nginx web server
+       ansible.builtin.apt:
+         name: nginx
+         state: present
+
+     - name: Configure Nginx for LightHouse
+       ansible.builtin.template:
+         src: nginx_lighthouse.conf.j2
+         dest: /etc/nginx/conf.d/lighthouse.conf
+         mode: '644'
+       notify: Restart Nginx
+
+     - name: Start Nginx service
+       ansible.builtin.service:
+         name: nginx
+         state: started
+         enabled: true

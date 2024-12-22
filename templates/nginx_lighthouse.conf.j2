@@ -1,0 +1,13 @@
+server {
+    listen 80;
+    server_name {{ ansible_host }};        # IP адрес                                          
+
+    location / {
+        root {{ lighthouse_extract_path }}/lighthouse-master;
+        index index.html;
+
+        try_files $uri $uri/ =404;
+    }
+}
+
+
